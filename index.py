@@ -52,7 +52,7 @@ def scan():
     
     db = Connection().flit
     twits = flit.twits
-    urls = flit.urls
+    #urls = flit.urls
     
     for i in data :
         hashed_url = hashlib.sha1(i.url).hexdigest()
@@ -67,12 +67,14 @@ def scan():
                 'hashed_url' : hashed_url,
                 'created' : datetime.datetime.utcnow(),
                 'user' : i.from_user,
+                'count' : 0
             }
                         
             twits.insert(twit)
-            urls.insert()
-    
-    
+            #urls.insert()
+        else :
+            id = twits.update({'_id' : recorded_twit['_id'], 'count' : recorder_twit.count + 1})
+                
     
     #print data.r
     
