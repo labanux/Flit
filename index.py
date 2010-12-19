@@ -1,5 +1,5 @@
 """
-Percobaan bikin apps pake Flask, buat nyari Link apa yang lagi populer di Twitter
+Percobaan bikin apps pake Flask, buat nyari Link apa yang lagi populer di Twitter. *coba kasih editan aja deh :)
 """
 
 from flask import Flask, request, session, url_for, redirect, render_template, abort, g, flash
