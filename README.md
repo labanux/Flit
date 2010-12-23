@@ -13,6 +13,6 @@ Kota yang disupport
 Link
 --------
 
-Webnya juga belum jalan, masih di localhost
+Webnya juga belum jalan, masih di localhost :D
 
 Tapi mungkin nanti ditulis di http://okto.silaban.net
