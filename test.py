@@ -30,4 +30,7 @@ conn.setopt(pycurl.WRITEFUNCTION, b.write)
 conn.perform() 
 
 data = b.getvalue()
-data = json.loads(data)   
+data = json.loads(data)
+
+for i in data['results'] :
+    print i['text']
