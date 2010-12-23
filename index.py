@@ -40,8 +40,8 @@ def scan():
     city = cities['jakarta']
     
     twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city+'%2C100km'
-    
-    data = json.loads(url_description(twitter_search))
+    data = url_description(twitter_search)
+    data = json.loads(data)
     
     flit = Connection().flit    
     twits = flit.twits
