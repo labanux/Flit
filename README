@@ -1,5 +1,18 @@
-Bisa lewat SVN ternyata.
+Flit : Ngelist link yang populer di Tweps Indonesia
+===================================================
 
-Alamatnya : http://svn.github.com/labanux/Flit.git
+Cuma proyek iseng. Belum bisa dijalankan. Tujuannya cuma buat nyobain Python dan
+MongoDB pakai PyMongo & Flask.
 
-Keren juga.. :D
+Kota yang disupport
+-------------------
+
+   * Jakarta
+     Ini pun belum jalan :P
+
+Link
+--------
+
+Webnya juga belum jalan, masih di localhost
+
+Tapi mungkin nanti ditulis di http://okto.silaban.net

@@ -39,60 +39,64 @@ def scan():
     
     city = cities['jakarta']
     
-    STREAM_URL = 'http://search.twitter.com/search.json?q=http+filter:links+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city+'%2C100km'
-    conn = pycurl.Curl()
-    b = StringIO.StringIO()
+    twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city+'%2C100km'
     
-    conn.setopt(pycurl.URL, STREAM_URL)
-    conn.setopt(pycurl.WRITEFUNCTION, b.write)
-    conn.perform() 
-
-    data = b.getvalue()
-    data = json.loads(data)
+    data = json.loads(url_description(twitter_search))
     
-    flit = Connection().flit
+    flit = Connection().flit    
     twits = flit.twits
-    #urls = flit.urls
+    links = flit.links
     
-    for i in data :
-        hashed_url = hashlib.sha1(i.url).hexdigest()
+    for i in data :        
+        recorded_twits = twits.find({'twit_id' : i.id})
         
-        recorded_twit = twits.find({'hashed_url' : hashed_url})
-        
-        if recorded_twit.count() < 1 :
+        if recorded_twits.count < 1 :
+            
+            twit = {
+                'text' : i.text,
+                'username' : i.from_user,
+                'created' : datetime.datetime.utcnow(),
+                'twit_id' : i.id
+            }
+            twits.insert(twit)
             
             import re
             link_url = re.search("(?P<url>https?://[^\s]+)", i.text).group("url")
             
-            twit = {
-                'text' : i.text,
-                'url' : link_url,
-                'hashed_url' : hashed_url,
-                'created' : datetime.datetime.utcnow(),
-                'user' : i.from_user,
-                'count' : 0
-            }
-                        
-            twits.insert(twit)
-            #urls.insert()
-        else :
-            twits.update({'_id' : recorded_twit['_id'], 'count' : recorded_twit['count'] + 1})
+            import urllib2
+            response = urllib2.urlopen(i.url)
+            url = response.url
+            
+            hashed_url = hashlib.sha1(url).hexdigest()
+            recorded_links = twits.find({'hashed_url' : hashed_url})
+            
+            if recorded_links.count < 1 :
+                content = url_description('http://api.digaku.com/fetch_url?u='+url+'&api_key=7956939c25fabef254a3eafbdff50ee0e829f6d1')                
                 
+                link = {
+                    'title' : content['title'],
+                    'description' : content['content'],
+                    'username' : i.from_user,
+                    'count' : 0,
+                    'created' : datetime.datetime.utcnow()
+                }
+                
+                links.insert(link)
+            else :
+                links.update({'_id' : recorded_links['_id'], 'count' : recorded_links['count'] + 1})
     
-    #print data.r
+    return render_template('scan.html', data = 'done')
     
-    return render_template('scan.html', data = data['results'])
-    
-def url_description(STREAM_URL) :
+def url_description(url) :
     conn = pycurl.Curl()
     b = StringIO.StringIO()
     
-    conn.setopt(pycurl.URL, STREAM_URL)
+    conn.setopt(pycurl.URL, url)
     conn.setopt(pycurl.WRITEFUNCTION, b.write)
     conn.perform() 
 
     data = b.getvalue()
-    return json.loads(data)
+    return json.loads(data['result'])
     
 
 app.run(debug = True)
