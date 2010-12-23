@@ -50,7 +50,7 @@ def scan():
     data = b.getvalue()
     data = json.loads(data)
     
-    db = Connection().flit
+    flit = Connection().flit
     twits = flit.twits
     #urls = flit.urls
     
@@ -61,9 +61,12 @@ def scan():
         
         if recorded_twit.count() < 1 :
             
+            import re
+            link_url = re.search("(?P<url>https?://[^\s]+)", i.text).group("url")
+            
             twit = {
                 'text' : i.text,
-                'url' : i.url,
+                'url' : link_url,
                 'hashed_url' : hashed_url,
                 'created' : datetime.datetime.utcnow(),
                 'user' : i.from_user,
@@ -73,12 +76,24 @@ def scan():
             twits.insert(twit)
             #urls.insert()
         else :
-            id = twits.update({'_id' : recorded_twit['_id'], 'count' : recorder_twit.count + 1})
+            twits.update({'_id' : recorded_twit['_id'], 'count' : recorded_twit['count'] + 1})
                 
     
     #print data.r
     
     return render_template('scan.html', data = data['results'])
+    
+def url_description(STREAM_URL) :
+    conn = pycurl.Curl()
+    b = StringIO.StringIO()
+    
+    conn.setopt(pycurl.URL, STREAM_URL)
+    conn.setopt(pycurl.WRITEFUNCTION, b.write)
+    conn.perform() 
+
+    data = b.getvalue()
+    return json.loads(data)
+    
 
 app.run(debug = True)
     
