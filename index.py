@@ -3,6 +3,7 @@ Percobaan bikin apps pake Flask, buat nyari Link apa yang lagi populer di Twitte
 """
 
 from flask import Flask, request, session, url_for, redirect, render_template, abort, g, flash
+from fetch_url import get_summary
 import datetime
 import hashlib
 import pycurl
@@ -82,12 +83,13 @@ def scan():
             
             if recorded_links.count() < 1 :
                 print 'Link ini belum disimpan : ', link_url
-                content = url_description(link_url)
-                content = content['result']
+                #content = url_description(link_url)
+                #content = content['result']
+                (title, desc) = get_summary(link_url)
                 
                 link = {
-                    'title' : content['title'],
-                    'description' : content['content'],
+                    'title' : title,
+                    'description' : desc,
                     'url' : link_url,
                     'username' : i['from_user'],
                     'count' : 0,
