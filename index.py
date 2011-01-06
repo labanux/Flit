@@ -75,13 +75,16 @@ def scan():
             link_url = re.search("(?P<url>https?://[^\s]+)", i['text']).group("url")
             
             import urllib2
-            response = urllib2.urlopen(link_url)
-            link_url = response.url
+            try:
+                response = urllib2.urlopen(link_url)
+                link_url = response.url
+            except IOError, e:                
+                continue
             
             hashed_url = hashlib.sha1(link_url).hexdigest()
-            recorded_links = twits.find({'hashed_url' : hashed_url})
+            recorded_links = links.find({'hashed_url' : hashed_url})
             
-            if recorded_links.count() < 1 :
+            if recorded_links.count() == 0 :
                 print 'Link ini belum disimpan : ', link_url
                 #content = url_description(link_url)
                 #content = content['result']
@@ -100,8 +103,9 @@ def scan():
                 links.insert(link)
                 print 'Save ', i['id']
             else :
-                print 'Link ini sudah pernah disimpan, update saja ', url
-                links.update({'_id' : recorded_links['_id'], 'count' : recorded_links['count'] + 1})
+                print 'Link ini sudah pernah disimpan, update saja ', link_url
+                links.update({'_id' : recorded_links[0]['_id']}, {'$set': {'count': recorded_links[0]['count'] + 1}})
+                #count' : (recorded_links[0]['count'] + 1)}
         else :
             print 'Twit ini sudah pernah diproses. Skip ', i['text']
     
