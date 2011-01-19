@@ -18,7 +18,14 @@ app.config.from_object(__name__)
 
 @app.route('/')
 def index():
-    return "hello"
+    flit = Connection().flit        
+    #links = flit.links
+    links = flit.linkspic
+    
+    import pymongo
+    items = links.find().sort('count', pymongo.DESCENDING).limit(10)
+    
+    return render_template('index.html', items = items)
 
 @app.route('/scan')
 def scan():
@@ -40,7 +47,8 @@ def scan():
     
     city = cities['jakarta']
     
-    twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city+'%2C100km'
+    #twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city+'%2C100km'
+    twitter_search = 'http://search.twitter.com/search.json?q=http+twitpic+filter:links+include%3Aretweets&geocode='+city+'%2C100km'
     conn = pycurl.Curl()
     b = StringIO.StringIO()
     
@@ -52,16 +60,19 @@ def scan():
     data = json.loads(data)
     
     flit = Connection().flit    
-    twits = flit.twits
-    links = flit.links
+    #twits = flit.twits
+    #links = flit.links
+    
+    twits = flit.twitspic
+    links = flit.linkspic
     
     for i in data['results'] :        
         recorded_twits = twits.find({'twit_id' : i['id']})
-        print 'Checking Twit ID ', i['id']
-        print 'Recorded twits', recorded_twits.count()
+        #print 'Checking Twit ID ', i['id']
+        #print 'Recorded twits', recorded_twits.count()
         
         if recorded_twits.count() < 1 :
-            print 'Twit ini belum disimpan ', i['text']
+            #print 'Twit ini belum disimpan ', i['text']
             
             twit = {
                 'text' : i['text'],
@@ -85,7 +96,7 @@ def scan():
             recorded_links = links.find({'hashed_url' : hashed_url})
             
             if recorded_links.count() == 0 :
-                print 'Link ini belum disimpan : ', link_url
+                #print 'Link ini belum disimpan : ', link_url
                 #content = url_description(link_url)
                 #content = content['result']
                 (title, desc) = get_summary(link_url)
@@ -101,13 +112,13 @@ def scan():
                 }
                 
                 links.insert(link)
-                print 'Save ', i['id']
+                #print 'Save ', i['id']
             else :
-                print 'Link ini sudah pernah disimpan, update saja ', link_url
+                #print 'Link ini sudah pernah disimpan, update saja ', link_url
                 links.update({'_id' : recorded_links[0]['_id']}, {'$set': {'count': recorded_links[0]['count'] + 1}})
                 #count' : (recorded_links[0]['count'] + 1)}
-        else :
-            print 'Twit ini sudah pernah diproses. Skip ', i['text']
+        #else :
+            #print 'Twit ini sudah pernah diproses. Skip ', i['text']
     
     return render_template('scan.html', data = 'done')
     
@@ -121,7 +132,11 @@ def url_description(link_url) :
     conn.perform() 
     
     return json.loads(b.getvalue())
-    
 
-app.run(debug = True)
+@app.route('/hello')    
+def hello() :
+    return 'Hello dunia'
+    
+if __name__ == '__main__':
+    app.run()
     
