@@ -7,7 +7,7 @@ MongoDB pakai PyMongo & Flask.
 Kota yang disupport
 -------------------
 
-   * Jakarta (sudah jalan, tapi      
+   * Jakarta (sudah jalan, tapi belum sempurna)     
 
 Link
 --------
