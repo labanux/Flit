@@ -9,21 +9,20 @@ import hashlib
 import pycurl
 import StringIO
 import json
-from pymongo import Connection
+import pymongo
 
-# create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
-#app.config.from_envvar('MINITWIT_SETTINGS', silent=True)
 
 @app.route('/')
 def index():
-    flit = Connection().flit        
-    #links = flit.links
-    links = flit.linkspic
+    flit = pymongo.Connection().flit        
+    links = flit.links
+    #links = flit.linkspic
     
-    import pymongo
-    items = links.find().sort('count', pymongo.DESCENDING).limit(10)
+    d = datetime.datetime.now() - datetime.timedelta(hours=2)
+        
+    items = links.find({'created' : {"$gt" : d}}).sort('count', pymongo.DESCENDING).limit(10)
     
     return render_template('index.html', items = items)
 
@@ -47,8 +46,8 @@ def scan():
     
     city = cities['jakarta']
     
-    #twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city+'%2C100km'
-    twitter_search = 'http://search.twitter.com/search.json?q=http+twitpic+filter:links+include%3Aretweets&geocode='+city+'%2C100km'
+    twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city+'%2C100km'
+    #twitter_search = 'http://search.twitter.com/search.json?q=http+twitpic+filter:links+include%3Aretweets&geocode='+city+'%2C100km'
     conn = pycurl.Curl()
     b = StringIO.StringIO()
     
@@ -59,12 +58,12 @@ def scan():
     data = b.getvalue()
     data = json.loads(data)
     
-    flit = Connection().flit    
-    #twits = flit.twits
-    #links = flit.links
+    flit = pymongo.Connection().flit    
+    twits = flit.twits
+    links = flit.links
     
-    twits = flit.twitspic
-    links = flit.linkspic
+    #twits = flit.twitspic
+    #links = flit.linkspic
     
     for i in data['results'] :        
         recorded_twits = twits.find({'twit_id' : i['id']})
@@ -101,13 +100,16 @@ def scan():
                 #content = content['result']
                 (title, desc) = get_summary(link_url)
                 
+                domain = link_url.split(3)[2]
+                
                 link = {
                     'title' : title,
                     'description' : desc,
                     'url' : link_url,
+                    'domain' : domain,
                     'username' : i['from_user'],
                     'count' : 0,
-                    'created' : datetime.datetime.utcnow(),
+                    'created' : datetime.datetime.now(),
                     'hashed_url' : hashed_url
                 }
                 
@@ -120,22 +122,7 @@ def scan():
         #else :
             #print 'Twit ini sudah pernah diproses. Skip ', i['text']
     
-    return render_template('scan.html', data = 'done')
-    
-def url_description(link_url) :
-    #url = 
-    conn = pycurl.Curl()
-    b = StringIO.StringIO()
-    
-    conn.setopt(pycurl.URL, 'http://api.digaku.com/fetch_url?u='+link_url+'&api_key=7956939c25fabef254a3eafbdff50ee0e829f6d1')
-    conn.setopt(pycurl.WRITEFUNCTION, b.write)
-    conn.perform() 
-    
-    return json.loads(b.getvalue())
-
-@app.route('/hello')    
-def hello() :
-    return 'Hello dunia'
+    return render_template('scan.html', data = 'done')    
     
 if __name__ == '__main__':
     app.run()

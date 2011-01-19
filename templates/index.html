@@ -15,7 +15,7 @@
         <ul>
             {% for i in items %}
             <li>
-                <a href="{{i['url']}}">{{i['title']}}</a> ({{i['count']}})
+                <a href="{{i['url']}}">{{i['title']}}</a> ({{i['count']}} - {{ i['domain'] }})
                 <p>
                     {{i['description']}}
                 </p>
