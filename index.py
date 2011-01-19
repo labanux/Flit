@@ -27,6 +27,75 @@ def index():
     
     return render_template('index.html', items = items)
 
+def process_twit(data) :
+    data = json.loads(data)
+    
+    flit = Connection().flit    
+    twits = flit.twits
+    links = flit.links
+    
+    #twits = flit.twitspic
+    #links = flit.linkspic
+    
+    for i in data['results'] :        
+        recorded_twits = twits.find({'twit_id' : i['id']})
+        #print 'Checking Twit ID ', i['id']
+        #print 'Recorded twits', recorded_twits.count()
+        
+        if recorded_twits.count() < 1 :
+            #print 'Twit ini belum disimpan ', i['text']
+            
+            twit = {
+                'text' : i['text'],
+                'username' : i['from_user'],
+                'created' : datetime.datetime.utcnow(),
+                'twit_id' : i['id']
+            }
+            twits.insert(twit)
+            
+            import re
+            link_url = re.search("(?P<url>https?://[^\s]+)", i['text']).group("url")
+            
+            import urllib2
+            try:
+                response = urllib2.urlopen(link_url)
+                link_url = response.url
+            except IOError, e:                
+                continue
+            
+            hashed_url = hashlib.sha1(link_url).hexdigest()
+            recorded_links = links.find({'hashed_url' : hashed_url})
+            
+            if recorded_links.count() == 0 :
+                #print 'Link ini belum disimpan : ', link_url
+                #content = url_description(link_url)
+                #content = content['result']
+                (title, desc) = get_summary(link_url)
+                
+                domain = link_url.split('/', 3)[2]
+                
+                link = {
+                    'title' : title,
+                    'description' : desc,
+                    'url' : link_url,
+                    'domain' : domain,
+                    'username' : i['from_user'],
+                    'count' : 0,
+                    'created' : datetime.datetime.now(),                    
+                    'hashed_url' : hashed_url
+                }
+                
+                links.insert(link)
+                #print 'Save ', i['id']
+            else :
+                #print 'Link ini sudah pernah disimpan, update saja ', link_url
+                links.update({'_id' : recorded_links[0]['_id']}, {'$set': {'count': recorded_links[0]['count'] + 1}})
+
+@app.route('/add_help', methods=['POST'])
+def add_help():
+    
+    print "Thanks for helping.."
+
 @app.route('/scan')
 def scan():
     cities = {
@@ -156,7 +225,7 @@ def scan_cmd() :
     data = b.getvalue()
     data = json.loads(data)
     
-    flit = pymongo.Connection().flit    
+    flit = Connection().flit    
     twits = flit.twits
     links = flit.links
     
