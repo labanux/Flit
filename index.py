@@ -99,24 +99,25 @@ def add_help():
 @app.route('/scan')
 def scan(mode = None, city = 'jakarta'):
     cities = {
-        'jakarta' : '-6.2%2C106.8',
-        'bandung' : '-6.914744%2C07.609811',
-        'semarang' : '-6.966667%2C110.416667',
-        'yogyakarta' : '-7.801389%2C110.364444',
-        'malang' : '-7.98%2C112.62',
-        'surabaya' : '-7.265278%2C112.7425',
-        'bali' : '-8.65%2C115.216667',        
-        'medan' : '3.583333%2C98.666667',
-        'pekanbaru' : '0.533333%2C101.45',
-        'palembang' : '-2.991108%2C104.756733',
-        'padang' : '-0.95%2C100.353056',
-        'makassar' : '-5.133333%2C119.416667',
-        'manado' : '1.493056%2C124.841261'
+        'jakarta' : ['-6.2%2C106.8', 200],
+        'bandung' : ['-6.914744%2C07.609811', 100],
+        'semarang' : ['-6.966667%2C110.416667', 500],
+        'yogyakarta' : ['-7.801389%2C110.364444', 100],
+        'malang' : ['-7.98%2C112.62', 100],
+        'surabaya' : ['-7.265278%2C112.7425', 100],
+        'bali' : ['-8.65%2C115.216667', 100],       
+        'medan' : ['3.583333%2C98.666667', 100],
+        'pekanbaru' : ['0.533333%2C101.45', 100],
+        'palembang' : ['-2.991108%2C104.756733', 100],
+        'padang' : ['-0.95%2C100.353056', 100],
+        'makassar' : ['-5.133333%2C119.416667', 100],
+        'manado' : ['1.493056%2C124.841261', 100]
     }
     
-    city_geo = cities[city]
+    city_geo = cities[city][0]
+    city_range = cities[city][1]
     
-    twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city_geo+'%2C200km'
+    twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city_geo+'%2C'+city_range+'km&rpp=100'
     #twitter_search = 'http://search.twitter.com/search.json?q=http+twitpic+filter:links+include%3Aretweets&geocode='+city+'%2C100km'
     conn = pycurl.Curl()
     b = StringIO.StringIO()
