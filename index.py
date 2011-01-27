@@ -98,6 +98,10 @@ def add_help():
 
 @app.route('/scan')
 def scan(mode = None, city = 'jakarta'):
+    
+    #if get_city != None :
+    #    city = get_city
+        
     cities = {
         'jakarta' : ['-6.2%2C106.8', 200],
         'bandung' : ['-6.914744%2C07.609811', 100],
@@ -115,9 +119,9 @@ def scan(mode = None, city = 'jakarta'):
     }
     
     city_geo = cities[city][0]
-    city_range = cities[city][1]
+    city_range = str(cities[city][1])
     
-    twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city_geo+'%2C'+city_range+'km&rpp=100'
+    twitter_search = 'http://search.twitter.com/search.json?q=http+filter:links+-Like+-mtw.tl+-4sq.com+-tmi.me+-myloc.me+-tl.gd+include%3Aretweets&geocode='+city_geo+'%2C'+city_range+'km&rpp=50'
     #twitter_search = 'http://search.twitter.com/search.json?q=http+twitpic+filter:links+include%3Aretweets&geocode='+city+'%2C100km'
     conn = pycurl.Curl()
     b = StringIO.StringIO()
